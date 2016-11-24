@@ -6,6 +6,12 @@ set -e
 mkdir -p "$1" "$2"
 build=$(cd "$1/" && pwd)
 cache=$(cd "$2/" && pwd)
+env_dir=$(cd "$3/" && pwd)
+
+for key in SOURCEMAP_DIR SOURCEMAP_SENTRY_TOKEN SOURCEMAP_SENTRY_PROJECT SOURCEMAP_URL_PREFIX; do
+    [[ -f "${env_dir}/${key}" ]] && export "$key=$(cat "${env_dir}/${key}")"
+    [[ -z "${!key}" ]] && echo "-----> ${key} is missing or empty: unable to continue." && exit 1
+done
 
 # Prepare what we need
 JQ="${cache}/sentry-jq"
