@@ -21,7 +21,7 @@ if [[ ! -f "${JQ}" ]]; then
     chmod +x "${JQ}"
 fi
 
-API="https://sentry.io/api/0/projects/${SOURCEMAP_SENTRY_PROJECT}"
+API="https://sentry.io/api/0/organizations/${SOURCEMAP_SENTRY_ORG}"
 
 # Create a release
 echo "-----> Creating Sentry release ${SOURCE_VERSION} for project ${SOURCEMAP_SENTRY_PROJECT}"
