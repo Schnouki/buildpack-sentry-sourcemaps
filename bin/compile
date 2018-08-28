@@ -34,7 +34,7 @@ curl -sSf "${API}/releases/" \
   {
     \"version\": \"${SOURCE_VERSION}\",
     \"refs\": [{
-      \"repository\": :\"${SOURCEMAP_REPO}\",
+      \"repository\": \"${SOURCEMAP_REPO}\",
       \"commit\": \"${SOURCE_VERSION}\"
     }],
     \"projects\": [\"${SOURCEMAP_SENTRY_PROJECT}\"]
