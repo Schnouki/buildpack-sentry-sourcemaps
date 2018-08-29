@@ -8,7 +8,7 @@ build=$(cd "$1/" && pwd)
 cache=$(cd "$2/" && pwd)
 env_dir=$(cd "$3/" && pwd)
 
-for key in SOURCEMAP_DIR SOURCEMAP_SENTRY_TOKEN SOURCEMAP_SENTRY_PROJECT SOURCEMAP_URL_PREFIX; do
+for key in SOURCEMAP_DIR SOURCEMAP_SENTRY_TOKEN SOURCEMAP_SENTRY_PROJECT SOURCEMAP_SENTRY_ORG SOURCEMAP_REPO SOURCEMAP_URL_PREFIX; do
     [[ -f "${env_dir}/${key}" ]] && export "$key=$(cat "${env_dir}/${key}")"
     [[ -z "${!key}" ]] && echo "-----> ${key} is missing or empty: unable to continue." && exit 1
 done
@@ -21,7 +21,7 @@ if [[ ! -f "${JQ}" ]]; then
     chmod +x "${JQ}"
 fi
 
-API="https://sentry.io/api/0/projects/${SOURCEMAP_SENTRY_PROJECT}"
+API="https://sentry.io/api/0/organizations/${SOURCEMAP_SENTRY_ORG}"
 
 # Create a release
 echo "-----> Creating Sentry release ${SOURCE_VERSION} for project ${SOURCEMAP_SENTRY_PROJECT}"
@@ -30,7 +30,16 @@ curl -sSf "${API}/releases/" \
   -X POST \
   -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
   -H 'Content-Type: application/json' \
-  -d "{\"version\": \"${SOURCE_VERSION}\"}" \
+  -d "
+  {
+    \"version\": \"${SOURCE_VERSION}\",
+    \"refs\": [{
+      \"repository\": \"${SOURCEMAP_REPO}\",
+      \"commit\": \"${SOURCE_VERSION}\"
+    }],
+    \"projects\": [\"${SOURCEMAP_SENTRY_PROJECT}\"]
+  }
+  "
   >/dev/null
 
 # Retrieve files
