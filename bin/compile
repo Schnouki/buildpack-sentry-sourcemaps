@@ -54,6 +54,10 @@ curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
 cd "${build}/${SOURCEMAP_DIR}"
 for map in {*.js,*.js.map}
 do
+    if [ "$map" = "*.js" ] || [ "$map" = "*.js.map" ]; then
+      continue
+    fi
+
     sum=$(sha1sum "${map}" | cut -c -40)
     name="${SOURCEMAP_URL_PREFIX}${map}"
     res=($(${JQ} -r ". | map(select(.name == \"${name}\")) | first | .id + \" \" + (.sha1 // \"\")" "${files}"))
