@@ -23,8 +23,26 @@ fi
 
 API="https://sentry.io/api/0/projects/${SOURCEMAP_SENTRY_PROJECT}"
 
-# Create a release
-echo "-----> Creating Sentry release ${SOURCE_VERSION} for project ${SOURCEMAP_SENTRY_PROJECT}"
+# Find or create the release
+ORG_API="https://sentry.io/api/0/organizations/${SOURCEMAP_SENTRY_ORG}"
+
+RELEASE_NAME=$(curl -sSf "${ORG_API}/releases/" \
+  -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
+  | ruby -e "require 'json';\
+      release_name=JSON.load(STDIN.read).find do |r|; \
+        r['ref'] == '${SOURCE_VERSION}' && \
+          r['projects'].any? { |pr| pr['slug'] == '${SOURCEMAP_SENTRY_ORG}'};
+      end; \
+  STDOUT.puts URI.encode(release_name['version']) if release_name"
+)
+
+if [[ -z $RELEASE_NAME ]]; then
+  RELEASE_NAME=$SOURCE_VERSION
+fi
+
+
+
+echo "-----> Creating Sentry release ${RELEASE_NAME} for project ${SOURCEMAP_SENTRY_PROJECT}"
 
 curl -sSf "${API}/releases/" \
   -X POST \
@@ -50,7 +68,7 @@ for map in *.js.map; do
 
     if [[ "${res[0]}" == "" ]]; then
         echo "       Uploading ${map} to Sentry"
-        curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
+        curl -sSf "${API}/releases/${RELEASE_NAME}/files/" \
              -X POST \
              -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
              -F file=@"${map}" \
@@ -59,11 +77,11 @@ for map in *.js.map; do
 
     elif [[ "${res[1]}" != "${sum}" ]]; then
         echo "       Updating ${map} on Sentry"
-        curl -sSf "${API}/releases/${SOURCE_VERSION}/files/${res[0]}/" \
+        curl -sSf "${API}/releases/${RELEASE_NAME}/files/${res[0]}/" \
              -X DELETE \
              -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
              >/dev/null
-        curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
+        curl -sSf "${API}/releases/${RELEASE_NAME}/files/" \
              -X POST \
              -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
              -F file=@"${map}" \
