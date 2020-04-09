@@ -45,21 +45,21 @@ if [[ -n $RELEASE_NAME ]]; then
   echo "-----> Found Sentry release ${RELEASE_NAME} for ${ORG}"
 else
   RELEASE_NAME=$SOURCE_VERSION
-  echo "-----> No Sentry release found for ${SOURCE_VERSION} in ${ORG}"
-  echo "-----> Creating Sentry release ${SOURCE_VERSION} for project ${SOURCEMAP_SENTRY_PROJECT}"
+  echo "-----> No Sentry release found for ${RELEASE_NAME} in ${ORG}"
+  echo "-----> Creating Sentry release ${RELEASE_NAME} for project ${SOURCEMAP_SENTRY_PROJECT}"
 
   curl -sSf "${API}/releases/" \
     -X POST \
     -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
     -H 'Content-Type: application/json' \
-    -d "{\"version\": \"${SOURCE_VERSION}\"}" \
+    -d "{\"version\": \"${RELEASE_NAME}\"}" \
     >/dev/null
 fi
 
 # Retrieve files
 files=$(mktemp)
 echo "       Retrieving existing files to $files"
-curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
+curl -sSf "${API}/releases/${RELEASE_NAME}/files/" \
      -X GET \
      -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
      > "$files"
