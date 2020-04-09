@@ -35,7 +35,7 @@ RELEASE_NAME=$(curl -sSf "${ORG_API}/releases/" \
       return if res == ''; \
       release_name=JSON.load(res).find do |r|; \
         r['ref'] == '${SOURCE_VERSION}' && \
-          r['projects'].any? { |pr| pr['slug'] == '${SOURCEMAP_SENTRY_ORG}'}; \
+          r['projects'].any? { |pr| pr['slug'] == '${ORG}'}; \
       end; \
   STDOUT.puts URI.encode(release_name['version']) if release_name"
 )
