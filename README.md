@@ -17,7 +17,6 @@ Several environment variables are needed:
   URL (`https://example.com/dist/js/`) or a tilde-based prefix (`~/dist/js/`,
   see the [documentation][docs] for details). Make sure to include the final
   slash if it's needed.
-- `SOURCEMAP_SENTRY_ORG`: the organization to search against for releases
 
 Then add this buildpack to your app:
 
