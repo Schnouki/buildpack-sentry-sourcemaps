@@ -27,32 +27,33 @@ API="https://sentry.io/api/0/projects/${SOURCEMAP_SENTRY_PROJECT}"
 ORG=$(echo $SOURCEMAP_SENTRY_PROJECT | cut -d/ -f1)
 ORG_API="https://sentry.io/api/0/organizations/${ORG}"
 
+echo "-----> Searching for Sentry release referring to ${SOURCE_VERSION} for organization ${ORG}"
 RELEASE_NAME=$(curl -sSf "${ORG_API}/releases/" \
   -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
   | ruby -e "require 'json';\
-      res=STDIN.read
-      return if res == ''
+      res=STDIN.read; \
+      return if res == ''; \
       release_name=JSON.load(res).find do |r|; \
         r['ref'] == '${SOURCE_VERSION}' && \
-          r['projects'].any? { |pr| pr['slug'] == '${SOURCEMAP_SENTRY_ORG}'};
+          r['projects'].any? { |pr| pr['slug'] == '${SOURCEMAP_SENTRY_ORG}'}; \
       end; \
   STDOUT.puts URI.encode(release_name['version']) if release_name"
 )
 
-if [[ -z $RELEASE_NAME ]]; then
+if [[ -n $RELEASE_NAME ]]; then
+  echo "-----> Found Sentry release ${RELEASE_NAME} for ${ORG}"
+else
   RELEASE_NAME=$SOURCE_VERSION
+  echo "-----> No Sentry release found for ${SOURCE_VERSION} in ${ORG}"
+  echo "-----> Creating Sentry release ${SOURCE_VERSION} for project ${SOURCEMAP_SENTRY_PROJECT}"
+
+  curl -sSf "${API}/releases/" \
+    -X POST \
+    -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
+    -H 'Content-Type: application/json' \
+    -d "{\"version\": \"${SOURCE_VERSION}\"}" \
+    >/dev/null
 fi
-
-
-
-echo "-----> Creating Sentry release ${RELEASE_NAME} for project ${SOURCEMAP_SENTRY_PROJECT}"
-
-curl -sSf "${API}/releases/" \
-  -X POST \
-  -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
-  -H 'Content-Type: application/json' \
-  -d "{\"version\": \"${SOURCE_VERSION}\"}" \
-  >/dev/null
 
 # Retrieve files
 files=$(mktemp)
