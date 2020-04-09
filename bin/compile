@@ -25,6 +25,7 @@ API="https://sentry.io/api/0/projects/${SOURCEMAP_SENTRY_PROJECT}"
 
 # Find or create the release
 ORG=$(echo $SOURCEMAP_SENTRY_PROJECT | cut -d/ -f1)
+PROJECT=$(echo $SOURCEMAP_SENTRY_PROJECT | cut -d/ -f2)
 ORG_API="https://sentry.io/api/0/organizations/${ORG}"
 
 echo "-----> Searching for Sentry release referring to ${SOURCE_VERSION} for organization ${ORG}"
@@ -35,7 +36,7 @@ RELEASE_NAME=$(curl -sSf "${ORG_API}/releases/" \
       return if res == ''; \
       release_name=JSON.load(res).find do |r|; \
         r['ref'] == '${SOURCE_VERSION}' && \
-          r['projects'].any? { |pr| pr['slug'] == '${ORG}'}; \
+          r['projects'].any? { |pr| pr['slug'] == '${PROJECT}'}; \
       end; \
   STDOUT.puts URI.encode(release_name['version']) if release_name"
 )
