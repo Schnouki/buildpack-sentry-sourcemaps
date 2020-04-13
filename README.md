@@ -20,7 +20,7 @@ Several environment variables are needed:
 
 Then add this buildpack to your app:
 
-    heroku buildpacks:add https://github.com/Schnouki/buildpack-sentry-sourcemaps
+    heroku buildpacks:add https://github.com/Freshly/buildpack-sentry-sourcemaps
 
 And push a new relase.
 
