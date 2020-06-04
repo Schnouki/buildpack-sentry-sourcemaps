@@ -52,11 +52,13 @@ curl -sSf "${API}/releases/${SOURCE_VERSION}/files/" \
 
 # Upload the sourcemaps
 cd "${build}/${SOURCEMAP_DIR}"
-for map in {*.js,*.js.map}
+for map in $(find -name '*.js' -or -name '*.js.map');
 do
     if [ "$map" = "*.js" ] || [ "$map" = "*.js.map" ]; then
       continue
     fi
+
+    echo "Uploading or updating ${map}"
 
     sum=$(sha1sum "${map}" | cut -c -40)
     name="${SOURCEMAP_URL_PREFIX}${map}"
