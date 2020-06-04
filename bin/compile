@@ -61,7 +61,7 @@ do
     echo "Uploading or updating ${map}"
 
     sum=$(sha1sum "${map}" | cut -c -40)
-    name="${SOURCEMAP_URL_PREFIX}${map}"
+    name="${SOURCEMAP_URL_PREFIX}${map#"./"}"
     res=($(${JQ} -r ". | map(select(.name == \"${name}\")) | first | .id + \" \" + (.sha1 // \"\")" "${files}"))
 
     if [[ "${res[0]}" == "" ]]; then
