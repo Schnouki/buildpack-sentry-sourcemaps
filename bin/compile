@@ -61,14 +61,20 @@ fi
 # Retrieve files
 files=$(mktemp)
 echo "       Retrieving existing files to $files"
+
 curl -sSf "${API}/releases/${ENCODED_RELEASE_NAME}/files/" \
      -X GET \
      -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
      > "$files"
 
 # Upload the sourcemaps
-[ -d "${build}/${SOURCEMAP_DIR}" ] || echo "No directory at ${build}/${SOURCEMAP_DIR}. Skipping sourcemap uploading." && exit 0
-cd "${build}/${SOURCEMAP_DIR}"
+if [ -d "${build}/${SOURCEMAP_DIR}" ]; then
+  echo "       Using sourcemaps found at ${build}/${SOURCEMAP_DIR}"
+  cd ${build}/${SOURCEMAP_DIR}
+else
+  echo "       No directory at ${build}/${SOURCEMAP_DIR}. Skipping sourcemap uploading."
+  exit 0
+fi
 for map in *.js.map; do
     sum=$(sha1sum "${map}" | cut -c -40)
     name="${SOURCEMAP_URL_PREFIX}${map}"
