@@ -112,6 +112,7 @@ done
 echo "-----> Setting Sentry REVISION file to ${RELEASE_NAME}"
 BUILD_DIR=$1
 echo $RELEASE_NAME > $BUILD_DIR/REVISION
+echo $SOURCE_VERSION > $BUILD_DIR/SOURCE_VERSION
 
 rm "${files}"
 
