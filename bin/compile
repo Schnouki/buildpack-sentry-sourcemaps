@@ -67,6 +67,13 @@ curl -sSf "${API}/releases/${ENCODED_RELEASE_NAME}/files/" \
      -H "Authorization: Bearer ${SOURCEMAP_SENTRY_TOKEN}" \
      > "$files"
 
+# Set the release version so dyno metadata doesn't ruin everything above
+# https://docs.sentry.io/clients/ruby/config/#optional-settings and see 'releases'
+echo "-----> Setting Sentry REVISION file to ${RELEASE_NAME}"
+BUILD_DIR=$1
+echo $RELEASE_NAME > $BUILD_DIR/REVISION
+echo $SOURCE_VERSION > $BUILD_DIR/SOURCE_VERSION
+
 # Upload the sourcemaps
 if [ -d "${build}/${SOURCEMAP_DIR}" ]; then
   echo "       Using sourcemaps found at ${build}/${SOURCEMAP_DIR}"
@@ -106,13 +113,6 @@ for map in *.js.map; do
         echo "       ${map} is up-to-date"
     fi
 done
-
-# Set the release version so dyno metadata doesn't ruin everything above
-# https://docs.sentry.io/clients/ruby/config/#optional-settings and see 'releases'
-echo "-----> Setting Sentry REVISION file to ${RELEASE_NAME}"
-BUILD_DIR=$1
-echo $RELEASE_NAME > $BUILD_DIR/REVISION
-echo $SOURCE_VERSION > $BUILD_DIR/SOURCE_VERSION
 
 rm "${files}"
 
