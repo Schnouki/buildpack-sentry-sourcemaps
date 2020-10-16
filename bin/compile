@@ -43,7 +43,7 @@ RELEASE_NAME=$(curl -sSf "${ORG_API}/releases/" \
 
 if [[ -n $RELEASE_NAME ]]; then
   echo "-----> Found Sentry release ${RELEASE_NAME} for ${ORG}"
-  ENCODED_RELEASE_NAME=$(ruby -e "STDOUT.puts URI.encode(ARGV[0])" "${RELEASE_NAME}")
+  ENCODED_RELEASE_NAME=$(ruby -ruri -e "STDOUT.puts URI.encode_www_form_component(ARGV[0]).gsub('+', '%20')" "${RELEASE_NAME}")
 else
   RELEASE_NAME=$SOURCE_VERSION
   ENCODED_RELEASE_NAME=$SOURCE_VERSION
